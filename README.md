@@ -201,3 +201,13 @@ Full compiler is available for evaluation under NDA. Contact dev@forgelang.dev.
 ---
 
 *Built with Zig 0.13.0 + LLVM 14. Zero dependencies at runtime.*
+
+## v0.3.1 Update (2026-06-06)
+
+FORGE v0.3.1 ships with **Phase 13** complete:
+
+- **Generics**: `fn max<T>`, `struct Pair<T>` — monomorphisation codegen
+- **Traits**: `trait Printable` + `impl Printable for Cat` — static dispatch  
+- **Concurrency**: `spawn worker(1)` → real pthreads; `async fn` + `await` syntax
+- **Ownership Regions**: `region { let buf = alloc(1024) }` → auto-free
+- All prior features (structs, enums, arrays, match, stdlib, WASM, ARM64) intact
