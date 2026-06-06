@@ -1,236 +1,183 @@
 # FORGE — The Parallel Compute Language
 
 > **Write sequential code. The compiler parallelises everything.**
-> **7,797× faster than Python · 4.57× @parallel speedup · 11,922 lines Zig · 11 live ecosystem sites**
+> **Zero GC · Auto-parallel · Cross-platform · Native/WASM/ARM64/Windows**
 
+[![Version](https://img.shields.io/badge/version-v0.2.0-7c3aed)](https://forgelang.dev)
 [![Website](https://img.shields.io/badge/website-forgelang.dev-7c3aed)](https://forgelang.dev)
 [![IDE](https://img.shields.io/badge/IDE-ide.forgelang.dev-38bdf8)](https://ide.forgelang.dev)
 [![Docs](https://img.shields.io/badge/docs-docs.forgelang.dev-a78bfa)](https://docs.forgelang.dev)
 [![Hub](https://img.shields.io/badge/Hub-hub.forgelang.dev-7c3aed)](https://hub.forgelang.dev)
-[![VS Code](https://img.shields.io/badge/VS%20Code-forgelangdev.forge--lang-007ACC)](https://marketplace.visualstudio.com/items?itemName=forgelangdev.forge-lang)
-[![Contact](https://img.shields.io/badge/contact-dev%40forgelang.dev-38bdf8)](mailto:dev@forgelang.dev)
+[![VS Code](https://img.shields.io/badge/VS%20Code-v0.2.0-007ACC)](https://marketplace.visualstudio.com/items?itemName=forgelangdev.forge-lang)
 
 ---
 
-## Overview
+## What FORGE Is
 
-FORGE is a next-generation parallel compute language and compiler that automatically distributes sequential code across all available CPU and GPU cores. No threading primitives. No manual parallelisation. No GC overhead.
+FORGE is a systems programming language that compiles to native binaries via LLVM. It is designed around three principles:
 
-Built in **11,922 lines of Zig** with a **LLVM 14 backend**, FORGE currently ships:
-- A mature compiler with lexer, parser, typechecker, and LLVM IR codegen
-- A complete CLI toolchain with 13 commands
-- An LSP language server
-- A published VS Code extension
-- A web IDE, package registry, code gallery, and snippet sharing service
-- A game engine with ECS, math library, and renderer
-- WebGPU/WGSL compute shader backend
-- DWARF debug info emission
-- FNV-1a incremental compilation cache
+1. **Zero GC** — no garbage collector, no runtime heap manager, no pauses
+2. **Auto-parallel** — annotate a function `@parallel`, the compiler splits it across CPU threads automatically
+3. **Simple syntax** — easier to write than Rust, as fast as C
 
-**Status: Acquisition-ready. Phase 0–7 complete.**
+```forge
+module Demo {
 
----
+    ; f32/f64 arithmetic — compiled to native LLVM float ops
+    fn dot_product(a: f32, b: f32, c: f32, d: f32) -> f32 {
+        return a * b + c * d
+    }
 
-## Performance
+    ; Recursive — fib(10) compiles to tight native loop
+    fn fib(n: i32) -> i32 {
+        if n <= 1 { return n }
+        return fib(n-1) + fib(n-2)
+    }
 
-| Metric | FORGE | Python | Speedup |
-|--------|-------|--------|---------|
-| Zero-copy stream throughput | **9.47 GB/s** | ~1.2 MB/s | **7,797× faster** |
-| 100M record processing (8 cores) | **416 ms** | ~12,000 ms | **28× faster** |
-| @parallel speedup (8 cores) | **4.57×** | N/A | Auto-distributed |
-| HTTP server memory | **212 KB** | ~45 MB | **212× leaner** |
-| Compile time (hello world) | **~60 ms** | N/A | Instant feedback |
+    ; @parallel — real pthread dispatch, 4 worker threads, zero GC
+    @parallel
+    fn sum_range(n: i64) -> i64 {
+        var total: i64 = 0
+        for i in 0..n {
+            total = total + i
+        }
+        return total
+    }
 
-All benchmarks measured on Intel Xeon E3-1270 V2 @ 3.5GHz, 8 cores, 32GB RAM, compiled with `-O ReleaseFast`.
+    fn main() -> void {
+        print("Hello from FORGE!")
+        let dp = dot_product(1.5, 2.0, 3.0, 4.0)
+        print("float ok")
+        let f = fib(10)
+        print("fib ok")
+        let s = sum_range(1000)
+        print("parallel ok")
+    }
+}
+```
 
----
-
-## The FORGE Ecosystem (11 Live Sites)
-
-| Site | URL | Description |
-|------|-----|-------------|
-| **Homepage** | [forgelang.dev](https://forgelang.dev) | Main site with benchmarks, roadmap, acquisition info |
-| **Documentation** | [docs.forgelang.dev](https://docs.forgelang.dev) | Language reference, stdlib docs, tutorials |
-| **Web IDE** | [ide.forgelang.dev](https://ide.forgelang.dev) | Monaco-based browser IDE with live compiler |
-| **Package Hub** | [hub.forgelang.dev](https://hub.forgelang.dev) | Package registry — 8 packages published |
-| **Demo/Acquisition** | [demo.forgelang.dev](https://demo.forgelang.dev) | Enterprise acquisition pitch deck |
-| **Code Gallery** | [gallery.forgelang.dev](https://gallery.forgelang.dev) | 12+ example programs |
-| **Code Share** | [share.forgelang.dev](https://share.forgelang.dev) | Snippet sharing service |
-| **Benchmarks** | [bench.forgelang.dev](https://bench.forgelang.dev) | Live benchmark dashboard |
-| **Game Engine** | [games.forgelang.dev](https://games.forgelang.dev) | FORGE game engine demos |
-| **FORGE Studio** | [studio.forgelang.dev](https://studio.forgelang.dev) | Advanced development environment |
-| **FORGE Cloud** | [cloud.forgelang.dev](https://cloud.forgelang.dev) | Cloud compute platform |
+**Try it live:** [ide.forgelang.dev](https://ide.forgelang.dev)
 
 ---
 
-## CLI Commands
+## v0.2.0 — What Works
 
-| Command | Description |
+### Language Features
+| Feature | Status | Notes |
+|---------|--------|-------|
+| `i32`, `i64`, `u32`, `u64` | ✅ | Full arithmetic, comparison |
+| `f32`, `f64` | ✅ | `fadd`/`fsub`/`fmul`/`fdiv` LLVM IR |
+| `str` | ✅ | Real `i8*` pointers, pass to functions |
+| `bool` | ✅ | `i1` in LLVM IR |
+| `[]i64`, `[]i32` | ✅ | Array/slice literals |
+| `struct` | ✅ | Struct definition + literal init |
+| `fn` | ✅ | Functions with params, return types |
+| `@parallel fn` | ✅ | 4 pthread workers, real OS threads |
+| `@gpu fn` | ✅ | OpenCL dispatch (pthread fallback on CPU) |
+| `for i in 0..n` | ✅ | Range loops |
+| `while` | ✅ | While loops |
+| `if`/`else` | ✅ | Conditionals |
+| `var` / `let` | ✅ | Mutable and immutable variables |
+| Recursion | ✅ | fib(n), mutual recursion |
+
+### Stdlib Builtins
+| Builtin | What it does |
 |---------|-------------|
-| `forge build <file>` | Compile FORGE source to native binary (ELF) |
-| `forge run <file>` | Build and execute a FORGE program |
-| `forge check <file>` | Type-check source without emitting binary |
-| `forge emit-ir <file>` | Dump LLVM IR for debugging/analysis |
-| `forge bench` | Run the benchmark suite |
-| `forge profile <file>` | Profile execution performance |
-| `forge fmt <file>` | Auto-format FORGE source code |
-| `forge repl` | Interactive REPL session |
-| `forge share <file>` | Share code via snippet service |
-| `forge game <name>` | Scaffold a new game engine project |
-| `forge llm <file>` | LLM inference utilities |
-| `forge pkg <command>` | Package management (publish, install, search) |
-| `forge lsp` | Start the LSP language server |
+| `print(str)` | Output to stdout |
+| `read_file(path)` | Read entire file → str |
+| `write_file(path, str)` | Write str to file |
+| `http_listen(port)` | POSIX socket server |
+| `http_accept(fd)` | Accept connection |
+| `http_recv(fd)` | Read request |
+| `http_respond(fd, str)` | Send HTTP response |
+| `sdl_init()` | SDL2 init |
+| `sdl_create_window(title, w, h)` | Game window |
+| `sdl_delay(ms)` | Frame delay |
+| `sdl_quit()` | SDL2 cleanup |
+| `close_fd(fd)` | Close socket/file descriptor |
 
-### Quick Start
-
+### Cross-Platform Targets
 ```bash
-forge check hello.forge    # type-check only
-forge build hello.forge    # compile → native binary
-forge run hello.forge      # compile + execute
+forge build file.forge                        # native x86_64 Linux
+forge build --release file.forge              # native + LLVM -O2 -march=native
+forge build --target wasm32 file.forge        # WebAssembly .wasm
+forge build --target aarch64-linux-gnu file.forge  # ARM64 Linux ELF
+forge build --target x86_64-windows file.forge     # Windows PE32+ .exe
+```
+
+### CLI Toolchain (all verified working)
+```bash
+forge run file.forge          # compile + run
+forge build file.forge        # compile to binary
+forge check file.forge        # type-check only
+forge emit-ir file.forge      # output LLVM IR
+forge fmt file.forge          # format source
+forge repl                    # interactive REPL (compiles each line)
+forge share file.forge        # upload to share.forgelang.dev
+forge bench                   # measure compile pipeline
+forge llm benchmark           # string throughput benchmark
+forge pkg add <name>          # add package
+forge pkg list                # list packages
+forge lsp                     # language server
+forge game new <name>         # scaffold game project
 ```
 
 ---
 
-## Standard Library
+## Ecosystem (12 live sites)
 
-| Module | Description |
-|--------|-------------|
-| `forge.io` | I/O streams, file operations, zero-copy streaming |
-| `forge.math` | Vec2, Vec3, Mat4, quaternions, noise functions |
-| `forge.engine` | Game engine: ECS, physics, renderer, input, audio |
-| `forge.llm` | LLM inference primitives, tensor operations |
-
----
-
-## VS Code Extension
-
-Published on VS Code Marketplace as **`forgelangdev.forge-lang`**.
-
-Features:
-- Full syntax highlighting (keywords, types, annotations, operators)
-- Snippets for `module`, `fn`, `@parallel fn`, `@gpu fn`, `@stream fn`, `struct`, `match`
-- Language configuration (bracket matching, auto-closing, comments)
-- LSP integration with type-checking on save
-- Inline hints for `@parallel` and `@gpu` annotated functions
-
-Install: Open VS Code → Extensions → Search "FORGE Lang" → Install
+| Site | URL | What it is |
+|------|-----|-----------|
+| Homepage | [forgelang.dev](https://forgelang.dev) | Language overview, phases 0–9 |
+| IDE | [ide.forgelang.dev](https://ide.forgelang.dev) | Monaco editor, live compiler, WASM download |
+| Hub | [hub.forgelang.dev](https://hub.forgelang.dev) | Package registry |
+| Docs | [docs.forgelang.dev](https://docs.forgelang.dev) | Full language reference |
+| Gallery | [gallery.forgelang.dev](https://gallery.forgelang.dev) | 12 working code examples |
+| Share | [share.forgelang.dev](https://share.forgelang.dev) | Code snippet sharing |
+| Bench | [bench.forgelang.dev](https://bench.forgelang.dev) | Benchmark leaderboard |
+| Games | [games.forgelang.dev](https://games.forgelang.dev) | Game showcase |
+| Studio | [studio.forgelang.dev](https://studio.forgelang.dev) | Game studio (waitlist) |
+| Cloud | [cloud.forgelang.dev](https://cloud.forgelang.dev) | Serverless GPU (coming) |
+| Demo | [demo.forgelang.dev](https://demo.forgelang.dev) | Enterprise acquisition pitch |
+| Test | [test.forgelang.dev](https://test.forgelang.dev) | FORGE-compiled homepage |
 
 ---
 
-## Compiler Architecture
+## Acquisition
 
-```
-Source (.forge)
-    ↓
-Lexer → Token Stream
-    ↓
-Parser → AST
-    ↓
-Typechecker → Typed AST
-    ↓
-LLVM IR Generator → LLVM IR
-    ↓
-Optimizer (constant folding, DCE)
-    ↓
-Clang/LLVM → ELF binary
-```
+FORGE is seeking strategic acquisition or investment. Target: $200M–$2B.
 
-Built in **11,922 lines of Zig** across ~60 source files:
-- `src/lexer.zig` — Recursive descent tokenizer
-- `src/parser.zig` — AST builder
-- `src/typechecker.zig` — Type inference + checking
-- `src/codegen.zig` — LLVM IR code generation
-- `src/forge.zig` — CLI entry point
-- `src/lsp.zig` — Language server protocol
-- `src/cli/` — Command implementations
-
----
-
-## Language Features
-
-- **`@parallel` annotation** — Auto-distributes data-parallel operations across all CPU cores
-- **`@gpu` annotation** — Offloads computation to GPU via WebGPU/WGSL
-- **`@stream` + `@zero_copy`** — Zero-copy predictive prefetch streaming
-- **Ownership Regions** — Deterministic memory management, no GC pauses
-- **Module system** — Namespaced modules with import paths
-- **Pattern matching** — `match` expressions with exhaustive checking
-- **Type inference** — Full Hindley-Milner style type inference
-- **Game-first ECS** — Entity-component system as a language primitive
-
----
-
-## Roadmap Status
-
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 0 | ✅ Complete | Benchmarks: 9.47 GB/s, 19× Python |
-| Phase 1 | ✅ Complete | Runtime: memory regions, fibers, streams |
-| Phase 2 | ✅ Complete | Compiler: lexer, parser, typechecker, LLVM codegen |
-| Phase 3 | ✅ Complete | Game engine, ForgeHub, LSP server |
-| Phase 4 | ✅ Complete | WebGPU, incremental cache, debug info |
-| Phase 5 | ✅ Complete | Native binary, web IDE, package registry, VS Code |
-| Phase 6 | ✅ Complete | @parallel → real speedup, forge pkg publish |
-| Phase 7 | ✅ Complete | docs.forgelang.dev, games, studio, cloud |
-
----
-
-## Repository Structure
-
-```
-.
-├── src/                  # Zig source (11,922 lines total)
-│   ├── lexer.zig         # Tokenizer
-│   ├── parser.zig        # AST parser
-│   ├── typechecker.zig   # Type checker
-│   ├── codegen.zig       # LLVM IR codegen
-│   ├── forge.zig         # CLI entry
-│   ├── lsp.zig           # LSP server
-│   ├── cli/              # Command implementations
-│   ├── runtime/          # Runtime library
-│   ├── stdlib/           # Standard library (io, math, engine, llm)
-│   └── game/             # Game engine ECS
-├── tools/
-│   ├── vscode/           # VS Code extension
-│   └── scripts/          # Dev tooling
-├── tests/                # Test suite (21/21 passing)
-├── examples/             # Example FORGE programs
-└── docs/                 # Documentation
-```
-
----
-
-## Contact & Acquisition
-
-FORGE is **acquisition-ready** with a complete compiler, shipping ecosystem, and thousands of hours of engineering.
-
-| Package | Price | What's Included |
-|---------|-------|-----------------|
-| Annual Licence | $2M/yr | Commercial licence, 50 seats, support |
-| Source Code | $10M | Full source access, modification rights |
-| Full Acquisition | $200M–$2B | Everything: code + team + domains + ecosystem |
+The compiler IP (Phases 1–7, 11,922 lines Zig) is private. This repo contains the Phase 0 benchmark suite.
 
 **Contact:** dev@forgelang.dev
 
----
-
-## Links
-
-- **Website:** [forgelang.dev](https://forgelang.dev)
-- **Documentation:** [docs.forgelang.dev](https://docs.forgelang.dev)
-- **Web IDE:** [ide.forgelang.dev](https://ide.forgelang.dev)
-- **Package Hub:** [hub.forgelang.dev](https://hub.forgelang.dev)
-- **Demo:** [demo.forgelang.dev](https://demo.forgelang.dev)
-- **Gallery:** [gallery.forgelang.dev](https://gallery.forgelang.dev)
-- **Share:** [share.forgelang.dev](https://share.forgelang.dev)
-- **Benchmarks:** [bench.forgelang.dev](https://bench.forgelang.dev)
-- **Game Engine:** [games.forgelang.dev](https://games.forgelang.dev)
-- **Studio:** [studio.forgelang.dev](https://studio.forgelang.dev)
-- **Cloud:** [cloud.forgelang.dev](https://cloud.forgelang.dev)
-- **VS Code:** `forgelangdev.forge-lang` on Marketplace
-- **GitHub:** [github.com/forgelangdev/phase0](https://github.com/forgelangdev/phase0)
-- **Email:** dev@forgelang.dev
+Ideal partners: Epic Games (Unreal Engine integration), Microsoft (VS Code / M12 Ventures), NVIDIA (GPU backend), Apple (Metal backend).
 
 ---
 
-*FORGE — The parallel compute language for the next decade.*
-*11,922 lines · 11 live sites · Acquisition-ready*
+## Build from Source
+
+Phase 0 benchmark suite (this repo):
+```bash
+git clone https://github.com/forgelangdev/phase0
+cd phase0
+zig build run  # requires Zig 0.13.0
+```
+
+Full compiler is available for evaluation under NDA. Contact dev@forgelang.dev.
+
+---
+
+## Roadmap
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 0 | ✅ | Benchmark suite (this repo) |
+| 1–7 | ✅ Private | Compiler, LLVM backend, full CLI, ecosystem |
+| 8 | ✅ | stdlib: f32/f64, str, file I/O, HTTP, -O2 |
+| 9 | ✅ | Targets: WASM, ARM64, Windows, SDL2, @gpu |
+| 10 | 🔄 In progress | Error handling, closures, imports, LSP, benchmarks vs Go/Rust |
+
+---
+
+*Built with Zig 0.13.0 + LLVM 14. Zero dependencies at runtime.*
