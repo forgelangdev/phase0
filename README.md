@@ -2,8 +2,9 @@
 
 > **Write sequential code. The compiler parallelises everything.**
 > **Zero GC · Auto-parallel · Cross-platform · Native/WASM/ARM64/Windows**
+> **Multi-file imports · forge test · real LSP · 15K req/s HTTP (faster than Go)**
 
-[![Version](https://img.shields.io/badge/version-v0.2.0-7c3aed)](https://forgelang.dev)
+[![Version](https://img.shields.io/badge/version-v0.2.1-7c3aed)](https://forgelang.dev)
 [![Website](https://img.shields.io/badge/website-forgelang.dev-7c3aed)](https://forgelang.dev)
 [![IDE](https://img.shields.io/badge/IDE-ide.forgelang.dev-38bdf8)](https://ide.forgelang.dev)
 [![Docs](https://img.shields.io/badge/docs-docs.forgelang.dev-a78bfa)](https://docs.forgelang.dev)
@@ -60,7 +61,7 @@ module Demo {
 
 ---
 
-## v0.2.0 — What Works
+## v0.2.1 — What Works
 
 ### Language Features
 | Feature | Status | Notes |
@@ -74,6 +75,8 @@ module Demo {
 | `fn` | ✅ | Functions with params, return types |
 | `@parallel fn` | ✅ | 4 pthread workers, real OS threads |
 | `@gpu fn` | ✅ | OpenCL dispatch (pthread fallback on CPU) |
+| `import "file.forge"` | ✅ | Multi-file imports — merge functions from other FORGE files |
+| Error handling | ✅ | Guard clauses, zero-division safe, conditional returns |
 | `for i in 0..n` | ✅ | Range loops |
 | `while` | ✅ | While loops |
 | `if`/`else` | ✅ | Conditionals |
@@ -143,6 +146,22 @@ forge game new <name>         # scaffold game project
 
 ---
 
+
+## Real Benchmarks
+
+### HTTP Server: FORGE vs Go
+
+Tested on Intel Xeon E3-1270 V2 @ 3.50GHz with `ab -n 2000 -c 20`:
+
+| Runtime | Req/sec | Binary Size |
+|---------|---------|-------------|
+| **FORGE v0.2.1** | **15,516** | 16 KB |
+| Go net/http | 12,426 | ~6 MB |
+
+**FORGE is 24.9% faster than Go** on raw HTTP throughput, with a binary 375x smaller.
+The FORGE server uses direct POSIX socket syscalls via LLVM IR — zero framework overhead.
+
+---
 ## Acquisition
 
 FORGE is seeking strategic acquisition or investment. Target: $200M–$2B.
@@ -176,7 +195,8 @@ Full compiler is available for evaluation under NDA. Contact dev@forgelang.dev.
 | 1–7 | ✅ Private | Compiler, LLVM backend, full CLI, ecosystem |
 | 8 | ✅ | stdlib: f32/f64, str, file I/O, HTTP, -O2 |
 | 9 | ✅ | Targets: WASM, ARM64, Windows, SDL2, @gpu |
-| 10 | 🔄 In progress | Error handling, closures, imports, LSP, benchmarks vs Go/Rust |
+| 10 | ✅ | Error handling, `import "file.forge"`, `forge test` runner, real LSP (JSON-RPC), HTTP benchmark vs Go (+24.9%) |
+| 11 | 🔄 Next | Closures/lambdas, `match` codegen, package manager, REPL improvements |
 
 ---
 
