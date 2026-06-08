@@ -1,213 +1,208 @@
-# FORGE — The Parallel Compute Language
+# FORGE v0.4.0 — The AI-Native Systems Language
 
-> **Write sequential code. The compiler parallelises everything.**
-> **Zero GC · Auto-parallel · Cross-platform · Native/WASM/ARM64/Windows**
-> **Multi-file imports · forge test · real LSP · 15K req/s HTTP (faster than Go)**
+> **The only compiled language where `ai_ask()` is a builtin.**
+> Native speed. Zero imports. Zero boilerplate.
 
-[![Version](https://img.shields.io/badge/version-v0.2.1-7c3aed)](https://forgelang.dev)
-[![Website](https://img.shields.io/badge/website-forgelang.dev-7c3aed)](https://forgelang.dev)
-[![IDE](https://img.shields.io/badge/IDE-ide.forgelang.dev-38bdf8)](https://ide.forgelang.dev)
-[![Docs](https://img.shields.io/badge/docs-docs.forgelang.dev-a78bfa)](https://docs.forgelang.dev)
-[![Hub](https://img.shields.io/badge/Hub-hub.forgelang.dev-7c3aed)](https://hub.forgelang.dev)
-[![VS Code](https://img.shields.io/badge/VS%20Code-v0.2.0-007ACC)](https://marketplace.visualstudio.com/items?itemName=forgelangdev.forge-lang)
+[![Version](https://img.shields.io/badge/version-0.4.0-orange)](https://forgelang.dev)
+[![Platform](https://img.shields.io/badge/platforms-Linux%20%7C%20Windows%20%7C%20Android%20%7C%20Web%20%7C%20macOS-blue)](https://forgelang.dev)
+[![Gallery](https://img.shields.io/badge/examples-26-green)](https://gallery.forgelang.dev)
+[![VS Code](https://img.shields.io/badge/VS%20Code-v0.4.0-blueviolet)](https://marketplace.visualstudio.com/items?itemName=forgelangdev.forge-lang)
 
 ---
 
-## What FORGE Is
-
-FORGE is a systems programming language that compiles to native binaries via LLVM. It is designed around three principles:
-
-1. **Zero GC** — no garbage collector, no runtime heap manager, no pauses
-2. **Auto-parallel** — annotate a function `@parallel`, the compiler splits it across CPU threads automatically
-3. **Simple syntax** — easier to write than Rust, as fast as C
+## What makes FORGE unique?
 
 ```forge
-module Demo {
+fn main() -> void {
+    ai_set_key("your-api-key")
 
-    ; f32/f64 arithmetic — compiled to native LLVM float ops
-    fn dot_product(a: f32, b: f32, c: f32, d: f32) -> f32 {
-        return a * b + c * d
-    }
+    // AI as a language primitive — no imports, no pip, no boilerplate
+    let answer = ai_ask("What is the speed of light?", "")
+    print(answer)
 
-    ; Recursive — fib(10) compiles to tight native loop
-    fn fib(n: i32) -> i32 {
-        if n <= 1 { return n }
-        return fib(n-1) + fib(n-2)
-    }
+    // Zero-shot classification — no ML training needed
+    let label = ai_classify("Win $1000!", "spam,important,newsletter")
+    print(label)  // spam
 
-    ; @parallel — real pthread dispatch, 4 worker threads, zero GC
-    @parallel
-    fn sum_range(n: i64) -> i64 {
-        var total: i64 = 0
-        for i in 0..n {
-            total = total + i
-        }
-        return total
-    }
-
-    fn main() -> void {
-        print("Hello from FORGE!")
-        let dp = dot_product(1.5, 2.0, 3.0, 4.0)
-        print("float ok")
-        let f = fib(10)
-        print("fib ok")
-        let s = sum_range(1000)
-        print("parallel ok")
-    }
+    // Translate + sentiment pipeline in 2 lines
+    let english = ai_translate("Bonjour monde", "English")
+    let mood    = ai_sentiment(english)
+    print(mood)  // positive
 }
 ```
 
-**Try it live:** [ide.forgelang.dev](https://ide.forgelang.dev)
+**Compare to Python:**
+```python
+from openai import OpenAI  # pip install openai
+client = OpenAI(api_key="sk-...")
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "What is the speed of light?"}]
+)
+print(response.choices[0].message.content)
+# 8 lines. 1 import. pip required. Python runtime required.
+```
+
+**FORGE: 4 lines. Zero imports. Native compiled binary.**
 
 ---
 
-## v0.2.1 — What Works
+## 10 Unique Features
 
-### Language Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| `i32`, `i64`, `u32`, `u64` | ✅ | Full arithmetic, comparison |
-| `f32`, `f64` | ✅ | `fadd`/`fsub`/`fmul`/`fdiv` LLVM IR |
-| `str` | ✅ | Real `i8*` pointers, pass to functions |
-| `bool` | ✅ | `i1` in LLVM IR |
-| `[]i64`, `[]i32` | ✅ | Array/slice literals |
-| `struct` | ✅ | Struct definition + literal init |
-| `fn` | ✅ | Functions with params, return types |
-| `@parallel fn` | ✅ | 4 pthread workers, real OS threads |
-| `@gpu fn` | ✅ | OpenCL dispatch (pthread fallback on CPU) |
-| `import "file.forge"` | ✅ | Multi-file imports — merge functions from other FORGE files |
-| Error handling | ✅ | Guard clauses, zero-division safe, conditional returns |
-| `for i in 0..n` | ✅ | Range loops |
-| `while` | ✅ | While loops |
-| `if`/`else` | ✅ | Conditionals |
-| `var` / `let` | ✅ | Mutable and immutable variables |
-| Recursion | ✅ | fib(n), mutual recursion |
+| # | Feature | One-liner |
+|---|---------|-----------|
+| 1 | **AI stdlib** | `ai_ask()`, `ai_classify()`, `ai_translate()` — native builtins, no SDK |
+| 2 | **@parallel** | Add one annotation, compiler parallelises across all CPU cores |
+| 3 | **Memory regions** | `region { }` — automatic free, no GC, no malloc |
+| 4 | **HTTP server builtins** | `http_listen`, `http_accept`, `http_respond` — zero imports |
+| 5 | **Game engine builtins** | SDL2 functions built into the language |
+| 6 | **Generics + Traits** | Zero-overhead monomorphisation, compile-time dispatch |
+| 7 | **async/await + spawn** | Native concurrency, no framework required |
+| 8 | **String + Math stdlib** | `str_upper()`, `math_sin()`, `math_random()` — native |
+| 9 | **5-platform compile** | Linux, Windows, Android, Web/WASM, macOS — one flag |
+| 10 | **forge new** | Instant project scaffolding |
 
-### Stdlib Builtins
-| Builtin | What it does |
-|---------|-------------|
-| `print(str)` | Output to stdout |
-| `read_file(path)` | Read entire file → str |
-| `write_file(path, str)` | Write str to file |
-| `http_listen(port)` | POSIX socket server |
-| `http_accept(fd)` | Accept connection |
-| `http_recv(fd)` | Read request |
-| `http_respond(fd, str)` | Send HTTP response |
-| `sdl_init()` | SDL2 init |
-| `sdl_create_window(title, w, h)` | Game window |
-| `sdl_delay(ms)` | Frame delay |
-| `sdl_quit()` | SDL2 cleanup |
-| `close_fd(fd)` | Close socket/file descriptor |
+---
 
-### Cross-Platform Targets
+## Quick Start
+
 ```bash
-forge build file.forge                        # native x86_64 Linux
-forge build --release file.forge              # native + LLVM -O2 -march=native
-forge build --target wasm32 file.forge        # WebAssembly .wasm
-forge build --target aarch64-linux-gnu file.forge  # ARM64 Linux ELF
-forge build --target x86_64-windows file.forge     # Windows PE32+ .exe
-```
+# Install
+curl -fsSL https://forgelang.dev/install.sh | bash
 
-### CLI Toolchain (all verified working)
-```bash
-forge run file.forge          # compile + run
-forge build file.forge        # compile to binary
-forge check file.forge        # type-check only
-forge emit-ir file.forge      # output LLVM IR
-forge fmt file.forge          # format source
-forge repl                    # interactive REPL (compiles each line)
-forge share file.forge        # upload to share.forgelang.dev
-forge bench                   # measure compile pipeline
-forge llm benchmark           # string throughput benchmark
-forge pkg add <name>          # add package
-forge pkg list                # list packages
-forge lsp                     # language server
-forge game new <name>         # scaffold game project
+# Create project
+forge new myapp
+cd myapp
+
+# Run
+forge run main.forge
+
+# Cross-compile
+forge build --target windows main.forge
+forge build --target web main.forge      # generates .wasm + .html
+forge build --target aarch64 main.forge  # Android/ARM64
 ```
 
 ---
 
-## Ecosystem (12 live sites)
+## AI Stdlib — Full Reference
 
-| Site | URL | What it is |
-|------|-----|-----------|
-| Homepage | [forgelang.dev](https://forgelang.dev) | Language overview, phases 0–9 |
-| IDE | [ide.forgelang.dev](https://ide.forgelang.dev) | Monaco editor, live compiler, WASM download |
-| Hub | [hub.forgelang.dev](https://hub.forgelang.dev) | Package registry |
-| Docs | [docs.forgelang.dev](https://docs.forgelang.dev) | Full language reference |
-| Gallery | [gallery.forgelang.dev](https://gallery.forgelang.dev) | 12 working code examples |
-| Share | [share.forgelang.dev](https://share.forgelang.dev) | Code snippet sharing |
-| Bench | [bench.forgelang.dev](https://bench.forgelang.dev) | Benchmark leaderboard |
-| Games | [games.forgelang.dev](https://games.forgelang.dev) | Game showcase |
-| Studio | [studio.forgelang.dev](https://studio.forgelang.dev) | Game studio (waitlist) |
-| Cloud | [cloud.forgelang.dev](https://cloud.forgelang.dev) | Serverless GPU (coming) |
-| Demo | [demo.forgelang.dev](https://demo.forgelang.dev) | Enterprise acquisition pitch |
-| Test | [test.forgelang.dev](https://test.forgelang.dev) | FORGE-compiled homepage |
+```forge
+fn main() -> void {
+    ai_set_key("sk-...")              // DeepSeek or OpenAI key
+    ai_set_model("deepseek-chat")    // optional: default is deepseek-chat
+
+    // Ask AI anything
+    let answer = ai_ask("prompt", "optional system context")
+
+    // Classify text (zero-shot, no training)
+    let label = ai_classify(text, "label1,label2,label3")
+
+    // Generate code/text
+    let code = ai_generate("write a Python bubble sort")
+
+    // Sentiment analysis
+    let mood = ai_sentiment(review_text)  // positive/negative/neutral
+
+    // Translation
+    let spanish = ai_translate("Hello world", "Spanish")
+
+    // Summarisation
+    let summary = ai_summarize(article, 50)  // max 50 words
+}
+```
+
+---
+
+## String & Math Stdlib
+
+```forge
+// String builtins
+let up       = str_upper("hello")        // HELLO
+let down     = str_lower("HELLO")        // hello
+let trimmed  = str_trim("  hello  ")     // hello
+let replaced = str_replace(s, "a", "b")
+let first    = str_split(csv, ",")       // first token
+let starts   = str_starts_with(s, "fn") // 1 or 0
+let ends     = str_ends_with(s, ".forge")
+
+// Math builtins
+let x = math_pow(2.0, 10.0)  // 1024.0
+let y = math_floor(3.7)       // 3.0
+let z = math_random()         // 0.0 - 1.0
+let s = math_sin(3.14159)
+let c = math_cos(0.0)
+
+// Env vars
+let home = env_get("HOME")
+env_set("MY_KEY", "value")
+```
 
 ---
 
+## Platform Targets
 
-## Real Benchmarks
-
-### HTTP Server: FORGE vs Go
-
-Tested on Intel Xeon E3-1270 V2 @ 3.50GHz with `ab -n 2000 -c 20`:
-
-| Runtime | Req/sec | Binary Size |
-|---------|---------|-------------|
-| **FORGE v0.2.1** | **15,516** | 16 KB |
-| Go net/http | 12,426 | ~6 MB |
-
-**FORGE is 24.9% faster than Go** on raw HTTP throughput, with a binary 375x smaller.
-The FORGE server uses direct POSIX socket syscalls via LLVM IR — zero framework overhead.
+```bash
+forge build main.forge                          # Linux native
+forge build --target windows main.forge         # Windows .exe
+forge build --target aarch64 main.forge         # Android/ARM64
+forge build --target web main.forge             # WASM + HTML wrapper
+forge build --target macos main.forge           # macOS binary
+forge build --release main.forge                # LLVM -O2 optimised
+```
 
 ---
-## Acquisition
 
-FORGE is seeking strategic acquisition or investment. Target: $200M–$2B.
+## Ecosystem (Live)
 
-The compiler IP (Phases 1–7, 11,922 lines Zig) is private. This repo contains the Phase 0 benchmark suite.
+| Site | URL |
+|------|-----|
+| Main | [forgelang.dev](https://forgelang.dev) |
+| Online IDE | [ide.forgelang.dev](https://ide.forgelang.dev) |
+| Gallery (26 examples) | [gallery.forgelang.dev](https://gallery.forgelang.dev) |
+| Docs | [docs.forgelang.dev](https://docs.forgelang.dev) |
+| Hub (packages) | [hub.forgelang.dev](https://hub.forgelang.dev) |
+| Benchmarks | [bench.forgelang.dev](https://bench.forgelang.dev) |
+| Games | [games.forgelang.dev](https://games.forgelang.dev) |
 
-**Contact:** dev@forgelang.dev
+---
 
-Ideal partners: Epic Games (Unreal Engine integration), Microsoft (VS Code / M12 Ventures), NVIDIA (GPU backend), Apple (Metal backend).
+## VS Code Extension
+
+Install from marketplace: `forgelangdev.forge-lang` v0.4.0
+
+- Syntax highlighting for all 50+ builtins including AI stdlib
+- 31 code snippets (ai_ask, ai_classify, @parallel, HTTP, SDL2...)
+- Type-checking on save
+- AI model & API key settings
 
 ---
 
 ## Build from Source
 
-Phase 0 benchmark suite (this repo):
 ```bash
 git clone https://github.com/forgelangdev/phase0
-cd phase0
-zig build run  # requires Zig 0.13.0
+cd forge-lang
+/opt/zig/zig build
+./zig-out/bin/forge --version  # FORGE v0.4.0
 ```
 
-Full compiler is available for evaluation under NDA. Contact dev@forgelang.dev.
+Requires: Zig 0.12+, LLVM/Clang, libcurl (for AI stdlib)
 
 ---
 
-## Roadmap
+## Acquisition Target
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 0 | ✅ | Benchmark suite (this repo) |
-| 1–7 | ✅ Private | Compiler, LLVM backend, full CLI, ecosystem |
-| 8 | ✅ | stdlib: f32/f64, str, file I/O, HTTP, -O2 |
-| 9 | ✅ | Targets: WASM, ARM64, Windows, SDL2, @gpu |
-| 10 | ✅ | Error handling, `import "file.forge"`, `forge test` runner, real LSP (JSON-RPC), HTTP benchmark vs Go (+24.9%) |
-| 11 | 🔄 Next | Closures/lambdas, `match` codegen, package manager, REPL improvements |
+FORGE is positioned for strategic acquisition at $200M–$2B.
+
+**Why now:** First-mover advantage — the only compiled language with AI as a stdlib primitive.
+No other compiled language (Rust, Go, C++, Swift) has `ai_ask()` built in.
+
+Target acquirers: Epic Games · Microsoft (M12) · NVIDIA · Apple · xAI
+
+Contact: dev@forgelang.dev
 
 ---
 
-*Built with Zig 0.13.0 + LLVM 14. Zero dependencies at runtime.*
-
-## v0.3.1 Update (2026-06-06)
-
-FORGE v0.3.1 ships with **Phase 13** complete:
-
-- **Generics**: `fn max<T>`, `struct Pair<T>` — monomorphisation codegen
-- **Traits**: `trait Printable` + `impl Printable for Cat` — static dispatch  
-- **Concurrency**: `spawn worker(1)` → real pthreads; `async fn` + `await` syntax
-- **Ownership Regions**: `region { let buf = alloc(1024) }` → auto-free
-- All prior features (structs, enums, arrays, match, stdlib, WASM, ARM64) intact
+*FORGE v0.4.0 — The AI-Native Systems Language*
+*Built with ❤️ and LLVM*
